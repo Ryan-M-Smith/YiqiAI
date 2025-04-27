@@ -100,7 +100,7 @@ export default function InputBar({ className, tickers, onSubmit, onSelectTickers
 							animation: "shadowCycle 3s infinite linear",
 						}}
 					>
-						<style jsx>
+						<style>
 							{`
 								@keyframes shadowCycle {
 									0% {
