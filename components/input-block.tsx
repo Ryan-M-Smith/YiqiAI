@@ -15,25 +15,7 @@ import { Chip } from "@heroui/chip";
 import { GiTalk } from "react-icons/gi";
 import { JSX, useEffect, useState, Key } from "react";
 import Link from "next/link";
-import { restClient } from '@polygon.io/client-js';
-import { Spinner } from "@heroui/spinner";
 import { Textarea } from "@heroui/input";
-
-// Debounce function to delay API calls
-function useDebounce<T>(value: T, delay: number): T {
-	const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-	// Update the debounced value after the specified delay
-	useEffect(() => {
-		const handler = setTimeout(() => {
-			setDebouncedValue(value);
-		}, delay);
-
-		return () => clearTimeout(handler);
-	}, [value, delay]);
-
-	return debouncedValue;
-}
 
 export default function InputBlock(): JSX.Element {
 	const [slug, setSlug] = useState<string>("");
@@ -42,47 +24,35 @@ export default function InputBlock(): JSX.Element {
 	const [query, setQuery] = useState<string>("");
 	const [autocomplete, setAutocomplete] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-  
-  	// Debounce the query with a 500ms delay
-  	const debouncedQuery = useDebounce(query, 500);
 
 	useEffect(() => {
-		if (debouncedQuery.length < 1) {
+		if (query.length < 1) {
 			return;
 		}
-
-		console.log("Querying API with:", debouncedQuery);
 
 		(async () => {
 			setIsLoading(true);
 
-			const polygonio = restClient(process.env.NEXT_PUBLIC_POLYGON_API_KEY as string);
-			const response = await polygonio.reference.tickers({
-				market: "stocks",
-				search: debouncedQuery,
-				active: "true",
-				order: 	"asc",
-				sort: 	"ticker",
-				limit: 	10
-			});
-
-			console.log("Response: ", response);
+			const response = await fetch(`
+				https://financialmodelingprep.com/stable/search-name?
+				query=${query}&apikey=${process.env.NEXT_PUBLIC_FMP_API_KEY}
+			`);
 		
-			if (response.status !== "OK") {
+			if (response.status !== 200) {
 				return;
 			}
 
-			const results = response.results;
+			const symbols = await response.json();
 
-			if (results.length < 1) {
+			if (symbols.length < 1) {
 				return;
 			}
 
-			const data = results.map(stock => `${stock.name} (${stock.ticker})`)
+			const data = symbols.map((stock: any) => `${stock.name} (${stock.symbol})`)
 			setAutocomplete([...data]);
 			setIsLoading(false);
 		})();
-  	}, [debouncedQuery]); // Only run effect when debouncedQuery changes
+  	}, [query]); // Only run effect when debouncedQuery changes
 
 	const removeTicker = (ticker: string) => (
 		setStocks(stocks.filter(stock => stock !== ticker))
