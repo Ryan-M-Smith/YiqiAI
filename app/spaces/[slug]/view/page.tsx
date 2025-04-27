@@ -53,8 +53,6 @@ export default function View(): JSX.Element {
 
 				const response = await fetch(url);
 				const data = await response.json();
-
-				console.log("Data:", data);
 				
 				// Filter to only include selected data points and format them
 				const filtered: { [key: string]: any } = {};
@@ -72,7 +70,6 @@ export default function View(): JSX.Element {
 			}
 
 			setOverviews([...overviews]);
-			console.log("Overviews:", overviews);
 		})();
 	}, [tickers]);
 
@@ -109,7 +106,6 @@ export default function View(): JSX.Element {
 			}
 
 			setNews([...news]);
-			console.log("News:", news);
 		})();
 	}, [tickers]);
 	

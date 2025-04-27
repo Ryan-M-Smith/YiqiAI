@@ -39,7 +39,6 @@ export default function InputBar({ className, tickers, onSubmit, onSelectTickers
 	};
 
 	const toggleChip = (ticker: string) => {
-		console.log(ticker);
 		// Attempt to remove the ticker
 		const newSelection = selectedTickers.filter(t => t !== ticker);
 

@@ -76,7 +76,6 @@ export default async function generate(query: string) {
 	const chunks: string[] = [];
 
 	for await (const chunk of response) {
-		console.log(chunk.text);
 		const text = chunk.text? chunk.text : JSON.stringify(chunk);
 		const sanitizedText = text.replace(/\[\d+(?:,\s*\d+)*\]/g, "");
 
