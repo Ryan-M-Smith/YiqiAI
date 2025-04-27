@@ -25,6 +25,7 @@ export default function View(): JSX.Element {
 	const [context, setContext] = useState<string>("");
 	const [overviews, setOverviews] = useState<{[key: string]: any}[]>([]);
 	const [news, setNews] = useState<{[key: string]: any}[]>([]);
+	const [upDowns, setUpDowns] = useState<{[key: string]: any}[]>([]);
 
 	// Fetch stock overviews for the selected tickers
 	useEffect(() => {
@@ -80,7 +81,8 @@ export default function View(): JSX.Element {
 		}
 
 		(async () => {
-			const polygonio = restClient(process.env.NEXT_PUBLIC_POLYGON_API_KEY);
+			const apiKey = process.env.NEXT_PUBLIC_POLYGON_API_KEY;
+			const polygonio = restClient(apiKey);
 			const news = [];
 
 			for (const ticker of tickers) {
@@ -107,6 +109,38 @@ export default function View(): JSX.Element {
 
 			setNews([...news]);
 		})();
+	}, [tickers]);
+
+	useEffect(() => {
+		if (tickers.length < 1) {
+			return;
+		}
+
+		
+		(async () => {
+			const apiKey = process.env.NEXT_PUBLIC_STOCKNEWSAPI_KEY;
+			const upDowns = [];
+			
+			for (const ticker of tickers) {
+				const url = `https://stocknewsapi.com/api/v1/ratings?tickers=${ticker}&items=1&page=1&token=${apiKey}`;
+				const response = await fetch(url);
+
+				if (response.status !== 200) {
+					return;
+				}
+
+				const [{ data }] = await response.json();
+				upDowns.push({
+					"Analyst Firm": data.analyst_firm,
+					"Current Rating": data.current_rating,
+					"Previous Price Target": formatCurrency(data.previous_price_target)
+				});
+			}
+
+			setUpDowns([...upDowns]);
+			console.log(upDowns);
+		})();
+
 	}, [tickers]);
 	
 	// Decode the slug and parse it as JSON
