@@ -1,56 +1,39 @@
-import { Link } from "@heroui/link";
-import { Snippet } from "@heroui/snippet";
-import { Code } from "@heroui/code";
-import { button as buttonStyles } from "@heroui/theme";
+//
+// Filename: page.tsx
+// Route: /
+// Created: 4/26/25 @ 5:14 PM
+// Copyright (c) 2025 Ryan Smith, Adithya Kommi, Abjana Bhandari
+//
 
-import { siteConfig } from "@/config/site";
-import { title, subtitle } from "@/components/primitives";
-import { GithubIcon } from "@/components/icons";
 
-export default function Home() {
-  return (
-    <section className="flex flex-col items-center justify-center gap-4 py-8 md:py-10">
-      <div className="inline-block max-w-xl text-center justify-center">
-        <span className={title()}>Make&nbsp;</span>
-        <span className={title({ color: "violet" })}>beautiful&nbsp;</span>
-        <br />
-        <span className={title()}>
-          websites regardless of your design experience.
-        </span>
-        <div className={subtitle({ class: "mt-4" })}>
-          Beautiful, fast and modern React UI library.
-        </div>
-      </div>
+import { JSX } from "react";
 
-      <div className="flex gap-3">
-        <Link
-          isExternal
-          className={buttonStyles({
-            color: "primary",
-            radius: "full",
-            variant: "shadow",
-          })}
-          href={siteConfig.links.docs}
-        >
-          Documentation
-        </Link>
-        <Link
-          isExternal
-          className={buttonStyles({ variant: "bordered", radius: "full" })}
-          href={siteConfig.links.github}
-        >
-          <GithubIcon size={20} />
-          GitHub
-        </Link>
-      </div>
+import GenCodeBlock from "@/components/gen-code-block";
+import InputBlock from "@/components/input-block";
+import Title from "@/components/title";
 
-      <div className="mt-8">
-        <Snippet hideCopyButton hideSymbol variant="bordered">
-          <span>
-            Get started by editing <Code color="primary">app/page.tsx</Code>
-          </span>
-        </Snippet>
-      </div>
-    </section>
-  );
+export default function Home(): JSX.Element {
+	return (
+		<div className="flex flex-col justify-center items-center h-screen min-h-screen px-4 sm:px-8 md:mx-48">
+			<div className="absolute top-10">
+				<Title/>
+			</div>
+			
+			<main className="w-full flex flex-col">
+				<div className="flex flex-col w-full gap-y-2 h-full">
+					<InputBlock/>
+
+					{/* <div className="flex flex-col md:flex-row gap-y-2 md:gap-x-2 w-full h-auto md:h-[500px]">
+						<div className="h-full">
+							<GenCodeBlock/>
+						</div>
+
+						<div className="bg-default-50 w-full rounded-md">
+							Filler
+						</div>
+					</div> */}
+				</div>
+			</main>
+		</div>
+	);
 }
