@@ -20,7 +20,9 @@ const modelID = "gemini-2.5-flash-preview-04-17";
 const context = {
 	text: 	`You are an expert on the stock market. You will be told about a certain stock to talk
 			about and will be an expert on that stock. Until you're told to be an expert on a new
-			stock, do not answer questions about anything else except if they're related to that stock.`,
+			stock, do not answer questions about anything else except if they're related to that stock.
+			Avoid putting references to sources in your answers. When you are limited to certain stocks,
+			avoid talking about other stocks.`,
 };
   
 const modelConfig: GenerateContentConfig = {
