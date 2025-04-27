@@ -63,8 +63,8 @@ export default function Title(): JSX.Element {
 	return (
 		<div>
 			<h1
-				ref={titleRef}
 				className="text-7xl font-extrabold text-center mt-10"
+				ref={titleRef}
 				style={{
 					background: "linear-gradient(90deg, #6ee7b7, #9333ea, #f472b6)",
 					backgroundSize: "200% 100%", // Gradient stretched across
@@ -78,14 +78,14 @@ export default function Title(): JSX.Element {
 			</h1>
 
 			<h2
+				className="text-xl sm:text-2xl md:text-3xl font-extrabold text-center mt-5 sm:mt-8 md:mt-10 text-wrap text-default-700"
 				ref={subtitleRef}
-				className="text-3xl font-extrabold text-center mt-10 text-default-700"
 				style={{
-					whiteSpace: "nowrap", // Keep the text in one line
+					whiteSpace: "normal", // Allow text to wrap on smaller screens
 					overflow: "hidden", // Hide anything that overflows
 				}}
 			>
-				Your stocks. All the data. Powered by AI.
+				Your stocks • All the data • Powered by AI
 			</h2>
 		</div>
 	);
