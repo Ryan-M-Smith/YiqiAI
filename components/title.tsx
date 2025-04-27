@@ -10,7 +10,12 @@
 import { gsap }	from "gsap";
 import { JSX, useEffect, useRef } from "react";
 
-export default function Title(): JSX.Element {
+interface TitleProps {
+	title?: 		string;
+	subtitle?: 	string;
+}
+
+export default function Title({ title, subtitle }: TitleProps): JSX.Element {
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const subtitleRef = useRef<HTMLHeadingElement>(null);
 	
@@ -63,7 +68,7 @@ export default function Title(): JSX.Element {
 	return (
 		<div>
 			<h1
-				className="text-7xl font-extrabold text-center mt-10"
+				className="text-7xl font-extrabold text-center"
 				ref={titleRef}
 				style={{
 					background: "linear-gradient(90deg, #6ee7b7, #9333ea, #f472b6)",
@@ -74,7 +79,7 @@ export default function Title(): JSX.Element {
 					WebkitBackgroundClip: "text", // For Safari
 				}}
 			>
-				YiqiAI
+				{title}
 			</h1>
 
 			<h2
@@ -85,7 +90,7 @@ export default function Title(): JSX.Element {
 					overflow: "hidden", // Hide anything that overflows
 				}}
 			>
-				Your stocks • All the data • Powered by AI
+				{subtitle}
 			</h2>
 		</div>
 	);
