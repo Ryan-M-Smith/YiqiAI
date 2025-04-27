@@ -130,17 +130,17 @@ export default function View(): JSX.Element {
 				}
 
 				const [{ data }] = await response.json();
+				
 				upDowns.push({
 					"Analyst Firm": data.analyst_firm,
 					"Current Rating": data.current_rating,
-					"Previous Price Target": formatCurrency(data.previous_price_target)
+					"Current Price Target": formatCurrency(data.current_price_target),
 				});
 			}
 
 			setUpDowns([...upDowns]);
 			console.log(upDowns);
 		})();
-
 	}, [tickers]);
 	
 	// Decode the slug and parse it as JSON
@@ -226,7 +226,7 @@ export default function View(): JSX.Element {
 										
 										<div className="flex gap-x-4 w-full">
 											<div className="flex-shrink-0 flex justify-center items-center">
-												<Image className="rounded-lg dark:bg-black bg-gray-300 p-1" src={logo} alt="Logo" width={40} height={20} />
+												<Image className="rounded-lg dark:bg-black bg-gray-300 p-1" src={logo} alt="Logo" width={40} height={40} />
 											</div>
 
 											<div className="flex flex-col gap-y-1 justify-start items-start">
