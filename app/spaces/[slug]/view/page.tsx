@@ -44,7 +44,7 @@ export default function View(): JSX.Element {
 		<div className="flex flex-col justify-center items-center h-screen max-h-screen px-4 sm:px-8 md:mx-20">
 			<main className="flex flex-col gap-y-2 w-full h-screen my-10">
 				<div>
-					<Title title="YiqiAI Spaces" subtitle=""/>
+					<Title title="YiqiAI Spaces"/>
 				</div>
 
 				<div className="flex gap-x-2 w-full h-[700px]">
