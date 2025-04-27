@@ -16,6 +16,7 @@ import { GiTalk } from "react-icons/gi";
 import { JSX, useEffect, useState, Key } from "react";
 import Link from "next/link";
 import { restClient } from '@polygon.io/client-js';
+import { Spinner } from "@heroui/spinner";
 import { Textarea } from "@heroui/input";
 
 // Debounce function to delay API calls
@@ -40,6 +41,7 @@ export default function InputBlock(): JSX.Element {
 	const [context, setContext] = useState<string>("")
 	const [query, setQuery] = useState<string>("");
 	const [autocomplete, setAutocomplete] = useState<string[]>([]);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
   
   	// Debounce the query with a 500ms delay
   	const debouncedQuery = useDebounce(query, 500);
@@ -52,6 +54,8 @@ export default function InputBlock(): JSX.Element {
 		console.log("Querying API with:", debouncedQuery);
 
 		(async () => {
+			setIsLoading(true);
+
 			const polygonio = restClient(process.env.NEXT_PUBLIC_POLYGON_API_KEY as string);
 			const response = await polygonio.reference.tickers({
 				market: "stocks",
@@ -76,6 +80,7 @@ export default function InputBlock(): JSX.Element {
 
 			const data = results.map(stock => `${stock.name} (${stock.ticker})`)
 			setAutocomplete([...data]);
+			setIsLoading(false);
 		})();
   	}, [debouncedQuery]); // Only run effect when debouncedQuery changes
 
@@ -140,12 +145,12 @@ export default function InputBlock(): JSX.Element {
 				onInputChange={setQuery}
 				onSelectionChange={handleSelectionChange}
 				inputValue={query}
-				selectedKey=""
+				isLoading={isLoading}
 				isClearable
 				isVirtualized
 			>
 				{
-					autocomplete.map((stock, i) => (
+					autocomplete.map((stock) => (
 						<AutocompleteItem key={stock} textValue={stock}>
 							{stock}
 						</AutocompleteItem>
