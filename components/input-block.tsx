@@ -9,10 +9,12 @@
 
 import { AiOutlineStock } from "react-icons/ai";
 import { Autocomplete, AutocompleteItem } from "@heroui/autocomplete";
+import base64url from "base64url";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { GiTalk } from "react-icons/gi";
 import { JSX, useEffect, useState, Key } from "react";
+import Link from "next/link";
 import { restClient } from '@polygon.io/client-js';
 import { Textarea } from "@heroui/input";
 
@@ -20,6 +22,7 @@ import { Textarea } from "@heroui/input";
 function useDebounce<T>(value: T, delay: number): T {
 	const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
+	// Update the debounced value after the specified delay
 	useEffect(() => {
 		const handler = setTimeout(() => {
 			setDebouncedValue(value);
@@ -32,6 +35,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function InputBlock(): JSX.Element {
+	const [slug, setSlug] = useState<string>("");
 	const [stocks, setStocks] = useState<string[]>([]);
 	const [context, setContext] = useState<string>("")
 	const [query, setQuery] = useState<string>("");
@@ -42,14 +46,13 @@ export default function InputBlock(): JSX.Element {
 
 	useEffect(() => {
 		if (debouncedQuery.length < 1) {
-			setAutocomplete([]);
 			return;
 		}
 
 		console.log("Querying API with:", debouncedQuery);
 
 		(async () => {
-			const polygonio = restClient(process.env.POLYGON_API_KEY as string);
+			const polygonio = restClient(process.env.NEXT_PUBLIC_POLYGON_API_KEY as string);
 			const response = await polygonio.reference.tickers({
 				market: "stocks",
 				search: debouncedQuery,
@@ -66,6 +69,11 @@ export default function InputBlock(): JSX.Element {
 			}
 
 			const results = response.results;
+
+			if (results.length < 1) {
+				return;
+			}
+
 			const data = results.map(stock => `${stock.name} (${stock.ticker})`)
 			setAutocomplete([...data]);
 		})();
@@ -78,16 +86,32 @@ export default function InputBlock(): JSX.Element {
 	const handleSelectionChange = (key: Key | null) => {
 		const selectedKey = key?.toString(); // Convert Key to string if necessary
 		
-		if (selectedKey && !stocks.includes(selectedKey)) {
-			// Extract just the ticker symbol from the selection (format: "Company Name (TICKER)")
-			const tickerMatch = selectedKey.match(/\(([^)]+)\)/);
-			const tickerSymbol = tickerMatch? tickerMatch[1] : selectedKey;
-			
+		if (!selectedKey) {
+			return;
+		}
+
+		// Extract just the ticker symbol from the selection (format: "Company Name (TICKER)")
+		const tickerMatch = selectedKey.match(/\(([^)]+)\)/);
+		const tickerSymbol = tickerMatch ? tickerMatch[1] : selectedKey;
+
+		if (!stocks.includes(tickerSymbol)) {
 			setStocks([...stocks, tickerSymbol]);
 			setQuery(""); // Clear the input after selection
 			setAutocomplete([]); // Clear autocomplete results
 		}
 	};
+
+	const buildSlug = () => {
+		const data = {
+			tickers: stocks,
+			context: context
+		};
+
+		const json = JSON.stringify(data);
+		const encoded = base64url.encode(json);
+
+		setSlug(encoded);
+	}
 
 	const StartContent = () => {
 		return stocks.length > 0? (
@@ -115,6 +139,7 @@ export default function InputBlock(): JSX.Element {
 				menuTrigger="input"
 				onInputChange={setQuery}
 				onSelectionChange={handleSelectionChange}
+				inputValue={query}
 				selectedKey=""
 				isClearable
 				isVirtualized
@@ -134,9 +159,11 @@ export default function InputBlock(): JSX.Element {
 				onValueChange={setContext}
 			/>
 
-			<Button className="w-full" onPress={ () => {} }>
-				View My Personal Space 🚀
-			</Button>
+			<Link href={`/spaces/${slug}/view`}>
+				<Button className="w-full" onPress={buildSlug}>
+					View My Personal Space 🚀
+				</Button>
+			</Link>
 		</div>
 	)
 }
