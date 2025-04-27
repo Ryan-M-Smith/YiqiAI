@@ -8,8 +8,11 @@
 "use client";
 
 import base64url from "base64url";
+import Image from "next/image";
 import { JSX, useEffect, useState, } from "react";
+import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
+import { restClient } from "@polygon.io/client-js";
 
 import ChatBot from "@/components/chatbot";
 import Title from "@/components/title";
@@ -21,7 +24,9 @@ export default function View(): JSX.Element {
 	const [tickers, setTickers] = useState<string[]>([]);
 	const [context, setContext] = useState<string>("");
 	const [overviews, setOverviews] = useState<{[key: string]: any}[]>([]);
+	const [news, setNews] = useState<{[key: string]: any}[]>([]);
 
+	// Fetch stock overviews for the selected tickers
 	useEffect(() => {
 		if (tickers.length < 1) {
 			return;
@@ -59,7 +64,7 @@ export default function View(): JSX.Element {
 					if (data[realKey]) {
 						// Apply formatting function if available
 						const formatter = dataPoints[key as keyof typeof dataPoints];
-						filtered[key] = formatter ? formatter(data[realKey]) : data[key];
+						filtered[key] = formatter? formatter(data[realKey]) : data[realKey];
 					}
 				});
 				
@@ -68,6 +73,43 @@ export default function View(): JSX.Element {
 
 			setOverviews([...overviews]);
 			console.log("Overviews:", overviews);
+		})();
+	}, [tickers]);
+
+	// Fetch news related to the selected tickers
+	useEffect(() => {
+		if (tickers.length < 1) {
+			return;
+		}
+
+		(async () => {
+			const polygonio = restClient(process.env.NEXT_PUBLIC_POLYGON_API_KEY);
+			const news = [];
+
+			for (const ticker of tickers) {
+				const response = await polygonio.reference.tickerNews({
+					ticker: ticker,
+					order: "asc",
+					limit: 1,
+					sort: "published_utc"
+				});
+
+				if (response.status !== "OK") {
+					return;
+				}
+
+				const [ article ] = response.results; 
+
+				news.push({
+					title: article.title,
+					author: article.author,
+					logo: article.publisher.favicon_url,
+					url: article.article_url
+				});
+			}
+
+			setNews([...news]);
+			console.log("News:", news);
 		})();
 	}, [tickers]);
 	
@@ -93,7 +135,7 @@ export default function View(): JSX.Element {
 	// Format functions for consistent data display
 	const formatCurrency = (value: string | number): string => {
 		const numValue = typeof value === "string" ? parseFloat(value) : value;
-		return new Intl.NumberFormat('en-US', {
+		return new Intl.NumberFormat("en-US", {
 			style: "currency",
 			currency: "USD",
 			minimumFractionDigits: 5,
@@ -103,10 +145,10 @@ export default function View(): JSX.Element {
 
 	const formatPercentage = (value: string): string => {
 		// Remove % sign if present
-		const cleanValue = value.replace('%', '').trim();
+		const cleanValue = value.replace("%", "").trim();
 		const numValue = parseFloat(cleanValue) / 100;
-		return new Intl.NumberFormat('en-US', {
-			style: 'percent',
+		return new Intl.NumberFormat("en-US", {
+			style: "percent",
 			minimumFractionDigits: 2,
 			maximumFractionDigits: 2
 		}).format(numValue);
@@ -120,21 +162,22 @@ export default function View(): JSX.Element {
 				</div>
 
 				<div className="flex gap-x-2 w-full h-[700px]">
-					<div className="bg-default-300 rounded-lg p-2 w-[30%] flex flex-col gap-y-2">
+					<div className="bg-default-300 rounded-lg p-2 w-[30%] flex flex-col gap-y-2 overflow-scroll overscroll-none">
 						{
 							overviews.map((overview, i) => (
 								<div key={i} className="bg-default-100 rounded-lg p-2">
-									{
-										Object.entries(overview).map(([key, value], i) => (
-											<div className="flex flex-col gap-y-1" key={i}>
-												<p className="text-lg font-bold text-green-300"> {tickers[i]} </p>
-												<p className="flex gap-x-1 text-wrap">
+									<div className="flex flex-col gap-y-1">
+										<p className="text-lg font-bold dark:text-green-300 text-green-500"> {tickers[i]} </p>
+
+										{
+											Object.entries(overview).map(([key, value], i) => (
+												<p key={i} className="flex gap-x-1 text-wrap">
 													<strong>{key}:</strong>
 													<span>{value}</span>
 												</p>
-											</div>
-										))
-									}
+											))
+										}
+									</div>
 								</div>
 							))
 						}
@@ -144,8 +187,30 @@ export default function View(): JSX.Element {
 						<ChatBot tickers={tickers} context={context}/>
 					</div>
 
-					<div className="bg-default-300 rounded-lg w-[30%]">
-						<p>Text</p>
+					<div className="bg-default-300 rounded-lg p-2 w-[30%] flex flex-col gap-y-2 overflow-scroll overscroll-none">
+						{
+							news.map(({ title, author, logo, url }, i) => (
+								<div key={i} className="bg-default-100 rounded-lg p-2">
+									<div className="flex flex-col gap-y-1">
+										<p className="text-lg font-bold dark:text-green-300 text-green-500"> {tickers[i]} </p>
+										
+										<div className="flex gap-x-4 w-full">
+											<div className="flex-shrink-0 flex justify-center items-center">
+												<Image className="rounded-lg dark:bg-black bg-gray-300 p-1" src={logo} alt="Logo" width={40} height={20} />
+											</div>
+
+											<div className="flex flex-col gap-y-1 justify-start items-start">
+												<Link className="dark:text-blue-400 text-blue-600 underline" href={url} rel="noopener noreferrer" target="_blank" passHref>
+													{title}
+												</Link>
+
+												<p className="italic text-default-500 text-sm"> {author} </p>
+											</div>
+										</div>
+									</div>
+								</div>
+							))
+						}
 					</div>
 				</div>
 			</main>
